@@ -34,10 +34,10 @@ def market_data(
 ):
     if source not in {"synthetic", "yfinance"}:
         raise HTTPException(status_code=422, detail="source must be 'synthetic' or 'yfinance'")
-    if not 150 <= periods <= 10000:
-        raise HTTPException(status_code=422, detail="periods must be between 150 and 10000")
-    if not 0 <= seed <= 2**32 - 1:
-        raise HTTPException(status_code=422, detail="seed must be between 0 and 2**32 - 1")
+    if not isinstance(periods, int) or isinstance(periods, bool) or not 150 <= periods <= 10000:
+        raise HTTPException(status_code=422, detail="periods must be an integer between 150 and 10000")
+    if not isinstance(seed, int) or isinstance(seed, bool) or not 0 <= seed <= 2**32 - 1:
+        raise HTTPException(status_code=422, detail="seed must be an integer between 0 and 2**32 - 1")
     try:
         frame = (
             synthetic_prices(periods=periods, seed=seed)
@@ -46,7 +46,7 @@ def market_data(
         )
         sample = frame.tail(20).assign(timestamp=lambda x: x.timestamp.astype(str))
         return {"symbol": symbol, "rows": len(frame), "data": sample.to_dict("records")}
-    except Exception as exc:
+    except (ValueError, RuntimeError, TypeError, KeyError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
@@ -56,8 +56,6 @@ def research_run(request: ResearchRequest):
         return run_research(**request.model_dump())
     except (ValueError, TypeError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail="Research workflow failed") from exc
 
 
 def run():
