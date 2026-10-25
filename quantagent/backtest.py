@@ -21,7 +21,7 @@ def _returns_metrics(returns: pd.Series) -> dict[str, float]:
         "total_return": float(equity.iloc[-1] - 1.0),
         "annualized_sharpe": sharpe,
         "max_drawdown": float(drawdown.min()),
-        "observations": int(len(values)),
+        "observations": len(values),
     }
 
 
