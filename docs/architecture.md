@@ -25,7 +25,8 @@ flowchart TB
     subgraph Core["Data and numerical modules"]
         SOURCE["Synthetic / Yahoo Finance adapters"]
         FEAT["features.py: lagged and rolling features"]
-        MODEL["models.py: scaler + logistic regression"]
+        MODEL["models.py: holdout scaler + classifier"]
+        WFMODEL["validation.py: fresh classifier per fold"]
         BT["backtest.py: costs + metrics"]
     end
 
@@ -41,7 +42,7 @@ flowchart TB
     RUN --> RISK
     RISK -. uses .-> BT
     RUN --> WF
-    WF -. uses .-> MODEL
+    WF -. fits .-> WFMODEL
     WF -. uses .-> BT
     RUN --> REPORT
     NOTE --> REPORT
