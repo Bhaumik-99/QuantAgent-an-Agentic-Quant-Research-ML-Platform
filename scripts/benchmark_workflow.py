@@ -13,8 +13,8 @@ from quantagent.workflow import run_research
 
 
 def run_benchmark(repeats: int = 5) -> dict:
-    if not 1 <= repeats <= 100:
-        raise ValueError("repeats must be between 1 and 100")
+    if not isinstance(repeats, int) or isinstance(repeats, bool) or not 1 <= repeats <= 100:
+        raise ValueError("repeats must be an integer between 1 and 100")
     latencies = []
     successes = 0
     run_ids = []
@@ -35,9 +35,9 @@ def run_benchmark(repeats: int = 5) -> dict:
                 successes += 1
                 run_ids.append(report["run_id"])
             latencies.append(elapsed)
-        except Exception:
+        except (ValueError, RuntimeError, KeyError, TypeError, AttributeError):
             latencies.append(time.perf_counter() - start)
-    deterministic = len(set(run_ids)) <= 1
+    deterministic = len(set(run_ids)) == 1 if run_ids else False
     return {
         "benchmark": "workflow_contract_and_reproducibility",
         "scope": "Python orchestration; not an LLM-agent quality benchmark",
