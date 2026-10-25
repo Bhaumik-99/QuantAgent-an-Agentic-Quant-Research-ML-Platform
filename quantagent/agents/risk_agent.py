@@ -1,8 +1,10 @@
 """Risk/evaluation agent with explicit integrity gates."""
+from __future__ import annotations
+
 import math
 
-from .research import AgentNote
 from ..backtest import evaluate_backtest
+from .research import AgentNote
 
 
 class RiskEvaluationAgent:
@@ -20,7 +22,9 @@ class RiskEvaluationAgent:
         )
         checks = {
             "chronological_split": model_result.train_rows > 0 and model_result.test_rows > 0,
-            "transaction_costs_included": math.isfinite(transaction_cost_bps) and transaction_cost_bps >= 0,
+            "transaction_costs_included": (
+                math.isfinite(transaction_cost_bps) and transaction_cost_bps >= 0
+            ),
             "out_of_sample_predictions": len(predictions) == model_result.test_rows,
             "prediction_timestamps_ordered_unique": bool(timestamps_ok),
             "positions_within_long_flat_bounds": bool(positions_ok),
