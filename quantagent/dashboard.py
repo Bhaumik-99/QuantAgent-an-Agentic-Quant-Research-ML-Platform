@@ -33,7 +33,7 @@ if st.button("Run research workflow", type="primary"):
         st.json(report["agent_trace"])
         st.subheader("Complete experiment report")
         st.json(report)
-    except Exception as exc:
+    except (ValueError, RuntimeError, TypeError) as exc:
         st.error(str(exc))
 st.warning(
     "Synthetic data is for pipeline validation only. Historical backtests do not establish future profitability."
@@ -41,8 +41,9 @@ st.warning(
 
 
 def run():
-    from streamlit.web import cli as stcli
     import sys
+
+    from streamlit.web import cli as stcli
 
     sys.argv = ["streamlit", "run", __file__]
     raise SystemExit(stcli.main())
