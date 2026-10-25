@@ -1,5 +1,8 @@
-from .research import AgentNote
+"""Market data validation agent."""
+from __future__ import annotations
+
 from ..data import validate_prices
+from .research import AgentNote
 
 
 class DataAgent:
