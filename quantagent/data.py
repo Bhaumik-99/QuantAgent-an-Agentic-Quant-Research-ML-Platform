@@ -51,6 +51,8 @@ def validate_prices(frame: pd.DataFrame) -> pd.DataFrame:
     result["close"] = pd.to_numeric(result["close"], errors="coerce")
     if result.isna().any().any():
         raise ValueError("Data contains invalid or missing timestamps/prices")
+    if not np.isfinite(result["close"].to_numpy(dtype=float)).all():
+        raise ValueError("Close prices must be finite")
     if (result["close"] <= 0).any():
         raise ValueError("Close prices must be positive")
     if result["timestamp"].duplicated().any():
