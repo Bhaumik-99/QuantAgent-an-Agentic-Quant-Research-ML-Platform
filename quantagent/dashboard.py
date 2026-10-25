@@ -9,7 +9,7 @@ st.caption("Agentic Quant Research & Model Evaluation — research-only simulati
 with st.sidebar:
     symbol = st.text_input("Symbol", "DEMO")
     source = st.selectbox("Data source", ["synthetic", "yfinance"])
-    periods = st.slider("Synthetic observations", 100, 3000, 800, 100) if source == "synthetic" else 800
+    periods = st.slider("Synthetic observations", 150, 3000, 800, 100) if source == "synthetic" else 800
     seed = st.number_input("Random seed", min_value=0, max_value=100000, value=7)
     costs = st.slider("Transaction cost (bps)", 0.0, 50.0, 5.0, 1.0)
 if st.button("Run research workflow", type="primary"):
