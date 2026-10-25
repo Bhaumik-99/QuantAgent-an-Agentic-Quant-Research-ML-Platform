@@ -1,7 +1,7 @@
 """Small Streamlit research dashboard."""
 import streamlit as st
 
-from .workflow import run_research
+from quantagent.workflow import run_research
 
 st.set_page_config(page_title="QuantAgent", page_icon=None, layout="wide")
 st.title("QuantAgent")
