@@ -19,3 +19,10 @@ def test_validator_sorts_timestamps():
     frame = synthetic_prices(100).iloc[::-1]
     result = validate_prices(frame)
     assert result.timestamp.is_monotonic_increasing
+
+@pytest.mark.parametrize("invalid_price", [float("inf"), float("-inf")])
+def test_validator_rejects_infinite_prices(invalid_price):
+    frame = synthetic_prices(100)
+    frame.loc[0, "close"] = invalid_price
+    with pytest.raises(ValueError, match="finite"):
+        validate_prices(frame)
