@@ -16,7 +16,7 @@ flowchart TB
         RUN["run_research()"]
         NOTE["ResearchAgent: hypothesis note"]
         DATA["DataAgent: validate prices"]
-        ML["MLAgent: features + holdout model"]
+        ML["MLAgent: orchestrate feature + holdout model"]
         RISK["RiskEvaluationAgent: backtest + integrity gates"]
         WF["Walk-forward evaluator"]
         REPORT["Structured research report"]
@@ -24,9 +24,9 @@ flowchart TB
 
     subgraph Core["Data and numerical modules"]
         SOURCE["Synthetic / Yahoo Finance adapters"]
-        FEAT["Past-derived features + next return"]
-        MODEL["Scaler + logistic regression"]
-        BT["Returns, costs, risk metrics, benchmark"]
+        FEAT["features.py: lagged and rolling features"]
+        MODEL["models.py: scaler + logistic regression"]
+        BT["backtest.py: costs + metrics"]
     end
 
     REST --> RUN
@@ -35,17 +35,19 @@ flowchart TB
     RUN --> NOTE
     RUN --> SOURCE
     SOURCE --> DATA
-    DATA --> FEAT
-    FEAT --> MODEL
-    MODEL --> ML
-    ML --> RISK
-    ML --> WF
-    RISK --> BT
-    RISK --> REPORT
-    WF --> BT
-    WF --> REPORT
-    DATA --> REPORT
+    RUN --> ML
+    ML -. uses .-> FEAT
+    ML -. uses .-> MODEL
+    RUN --> RISK
+    RISK -. uses .-> BT
+    RUN --> WF
+    WF -. uses .-> MODEL
+    WF -. uses .-> BT
+    RUN --> REPORT
     NOTE --> REPORT
+    DATA --> REPORT
+    RISK --> REPORT
+    WF --> REPORT
 ```
 
 ### Module responsibilities
