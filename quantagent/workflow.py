@@ -9,6 +9,8 @@ from .agents.research import ResearchAgent
 from .agents.data_agent import DataAgent
 from .agents.ml_agent import MLAgent
 from .agents.risk_agent import RiskEvaluationAgent
+from .features import make_features
+from .validation import walk_forward_evaluate
 
 
 def run_research(
@@ -20,8 +22,12 @@ def run_research(
 ) -> dict:
     if source not in {"synthetic", "yfinance"}:
         raise ValueError("source must be 'synthetic' or 'yfinance'")
-    if transaction_cost_bps < 0:
-        raise ValueError("transaction_cost_bps must be non-negative")
+    if not isinstance(periods, int) or periods < 150 or periods > 10000:
+        raise ValueError("periods must be an integer between 150 and 10000")
+    if not isinstance(seed, int) or seed < 0 or seed > 2**32 - 1:
+        raise ValueError("seed must be an integer between 0 and 2**32 - 1")
+    if not isinstance(transaction_cost_bps, (int, float)) or not __import__("math").isfinite(transaction_cost_bps) or transaction_cost_bps < 0:
+        raise ValueError("transaction_cost_bps must be finite and non-negative")
     trace = []
     research_note = ResearchAgent().run(symbol)
     trace.append(research_note.__dict__)
@@ -32,6 +38,12 @@ def run_research(
     trace.append(ml_note.__dict__)
     backtest, checks, risk_note = RiskEvaluationAgent().run(model_result, transaction_cost_bps)
     trace.append(risk_note.__dict__)
+    walk_forward = walk_forward_evaluate(
+        make_features(prices),
+        initial_train_fraction=0.5,
+        n_splits=3,
+        transaction_cost_bps=transaction_cost_bps,
+    )
     fingerprint = hashlib.sha256(pd_to_csv_bytes(prices)).hexdigest()
     run_material = f"{symbol}|{source}|{seed}|{periods}|{transaction_cost_bps}|{fingerprint}"
     run_id = hashlib.sha256(run_material.encode()).hexdigest()[:16]
@@ -55,6 +67,7 @@ def run_research(
             "metrics": model_result.metrics,
         },
         "backtest": backtest,
+        "walk_forward": walk_forward,
         "integrity_checks": checks,
         "agent_trace": trace,
         "disclaimer": "Research prototype only. Backtests are not predictive guarantees or investment advice.",
