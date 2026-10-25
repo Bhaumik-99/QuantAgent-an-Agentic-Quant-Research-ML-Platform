@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import hashlib
+import math
 
 from .data import synthetic_prices, yahoo_prices
 from .agents.research import ResearchAgent
@@ -26,7 +27,11 @@ def run_research(
         raise ValueError("periods must be an integer between 150 and 10000")
     if not isinstance(seed, int) or seed < 0 or seed > 2**32 - 1:
         raise ValueError("seed must be an integer between 0 and 2**32 - 1")
-    if not isinstance(transaction_cost_bps, (int, float)) or not __import__("math").isfinite(transaction_cost_bps) or transaction_cost_bps < 0:
+    if (
+        not isinstance(transaction_cost_bps, (int, float))
+        or not math.isfinite(transaction_cost_bps)
+        or transaction_cost_bps < 0
+    ):
         raise ValueError("transaction_cost_bps must be finite and non-negative")
     trace = []
     research_note = ResearchAgent().run(symbol)
