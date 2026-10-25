@@ -1,6 +1,9 @@
-from .research import AgentNote
+"""Baseline machine-learning agent."""
+from __future__ import annotations
+
 from ..features import make_features
 from ..models import train_baseline
+from .research import AgentNote
 
 
 class MLAgent:
