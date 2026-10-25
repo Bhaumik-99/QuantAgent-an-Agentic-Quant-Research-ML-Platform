@@ -22,12 +22,16 @@ class ModelResult:
 
 
 def train_baseline(features: pd.DataFrame, train_fraction: float = 0.7) -> ModelResult:
+    """Fit a chronological baseline, purging the label that crosses the split boundary."""
     if not 0.5 <= train_fraction <= 0.9:
         raise ValueError("train_fraction must be between 0.5 and 0.9")
     split = int(len(features) * train_fraction)
-    if split < 30 or len(features) - split < 20:
+    if split < 31 or len(features) - split < 20:
         raise ValueError("Not enough rows for chronological train/test evaluation")
-    train, test = features.iloc[:split], features.iloc[split:]
+    # The last training row's next_return uses the first test row's close.
+    train, test = features.iloc[: split - 1], features.iloc[split:]
+    if train["target"].nunique() < 2:
+        raise ValueError("Training data must contain both target classes")
     model = make_pipeline(
         StandardScaler(),
         LogisticRegression(max_iter=1000, random_state=7),
