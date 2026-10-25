@@ -1,15 +1,15 @@
 """Deterministic orchestration and experiment report generation."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import hashlib
 import math
+from datetime import UTC, datetime
 
-from .data import synthetic_prices, yahoo_prices
-from .agents.research import ResearchAgent
 from .agents.data_agent import DataAgent
 from .agents.ml_agent import MLAgent
+from .agents.research import ResearchAgent
 from .agents.risk_agent import RiskEvaluationAgent
+from .data import synthetic_prices, yahoo_prices
 from .features import make_features
 from .validation import walk_forward_evaluate
 
@@ -23,9 +23,9 @@ def run_research(
 ) -> dict:
     if source not in {"synthetic", "yfinance"}:
         raise ValueError("source must be 'synthetic' or 'yfinance'")
-    if not isinstance(periods, int) or periods < 150 or periods > 10000:
+    if not isinstance(periods, int) or isinstance(periods, bool) or periods < 150 or periods > 10000:
         raise ValueError("periods must be an integer between 150 and 10000")
-    if not isinstance(seed, int) or seed < 0 or seed > 2**32 - 1:
+    if not isinstance(seed, int) or isinstance(seed, bool) or seed < 0 or seed > 2**32 - 1:
         raise ValueError("seed must be an integer between 0 and 2**32 - 1")
     if (
         not isinstance(transaction_cost_bps, (int, float))
@@ -54,7 +54,7 @@ def run_research(
     run_id = hashlib.sha256(run_material.encode()).hexdigest()[:16]
     return {
         "run_id": run_id,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "symbol": symbol,
         "source": source,
         "dataset_fingerprint_sha256": fingerprint,
